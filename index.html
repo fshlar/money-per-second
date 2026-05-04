@@ -81,6 +81,23 @@
             font-size: 0.9rem;
         }
 
+        .vip-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ff6b00);
+            color: #111;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #ffd700; }
+            50% { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff6b00; }
+        }
+
         .toolbar {
             display: flex;
             justify-content: center;
@@ -201,6 +218,11 @@
             transition: all 0.3s ease;
         }
 
+        .display-card.vip-active {
+            border: 2px solid rgba(255, 107, 0, 0.6);
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
+        }
+
         .earnings-label {
             font-size: 0.9rem;
             color: var(--accent-gold);
@@ -312,6 +334,158 @@
 
         .btn:active {
             transform: translateY(0);
+        }
+
+        .premium-section {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .premium-section.hidden {
+            display: none;
+        }
+
+        .premium-card {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ffd700;
+        }
+
+        [data-theme="light"] .premium-card {
+            background: #fff5e6;
+        }
+
+        .premium-card h3 {
+            color: #ffd700;
+            margin: 0 0 15px 0;
+        }
+
+        .premium-features {
+            color: #eee;
+            text-align: left;
+            margin: 15px auto;
+            max-width: 300px;
+            line-height: 1.8;
+            list-style: none;
+            padding: 0;
+        }
+
+        [data-theme="light"] .premium-features {
+            color: #333;
+        }
+
+        .premium-features li {
+            margin-bottom: 8px;
+        }
+
+        .btn-unlock {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #111;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-unlock:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .premium-note {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-card-solid);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid var(--accent-gold);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal h2 {
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #fff;
+        }
+
+        .btn-cancel {
+            background: #666;
+            color: #fff;
         }
 
         .coin-container {
@@ -437,6 +611,26 @@
             z-index: 1001;
         }
 
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes firework {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--fx), var(--fy)) scale(0.3);
+            }
+        }
+
         .running-indicator {
             display: inline-block;
             width: 10px;
@@ -528,9 +722,20 @@
     <div class="coin-container" id="coinContainer"></div>
     <div class="share-toast" id="shareToast">已复制到剪贴板！</div>
 
+    <div class="modal-overlay" id="unlockModal">
+        <div class="modal">
+            <h2>✨ 解锁高级版</h2>
+            <input type="text" class="modal-input" id="codeInput" placeholder="请输入解锁码">
+            <div class="modal-buttons">
+                <button class="btn-modal btn-cancel" id="cancelBtn">取消</button>
+                <button class="btn-modal btn-confirm" id="confirmBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>💰 月薪计算器</h1>
+            <h1>💰 月薪计算器 <span class="vip-badge hidden" id="vipBadge">✨ VIP</span></h1>
             <p>看看你每秒能赚多少钱</p>
         </div>
 
@@ -583,6 +788,20 @@
             <button class="btn btn-pause" id="pauseBtn">暂停</button>
             <button class="btn btn-reset" id="resetBtn">重置</button>
         </div>
+
+        <div class="premium-section" id="premiumSection">
+            <div class="premium-card">
+                <h3>打工人专属「搞钱buff」已上线！</h3>
+                <ul class="premium-features">
+                    <li>✅ 金币暴击+烟花特效，每一秒都在爽</li>
+                    <li>✅ 自定义工作时长，精准算清你的「摸鱼成本」</li>
+                    <li>✅ 无广告纯净模式，沉浸式体验搞钱快乐</li>
+                    <li>✅ 专属打工人音效，进账即放「恭喜发财」</li>
+                </ul>
+                <button class="btn-unlock" id="unlockBtn">👉 19.9元解锁，爽一整年</button>
+                <p class="premium-note">付完款截图发给我，直接给你开通权限 ✨</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -604,6 +823,13 @@
         const shareBtn = document.getElementById('shareBtn');
         const shareToast = document.getElementById('shareToast');
         const displayCard = document.getElementById('displayCard');
+        const premiumSection = document.getElementById('premiumSection');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const unlockModal = document.getElementById('unlockModal');
+        const codeInput = document.getElementById('codeInput');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const vipBadge = document.getElementById('vipBadge');
 
         let isRunning = false;
         let totalEarnings = 0;
@@ -617,6 +843,73 @@
         let isDarkTheme = true;
         let criticalCombo = 0;
         let lastCriticalTime = 0;
+        let isVip = false;
+        const VIP_CODE = 'VIP2026';
+
+        function init() {
+            checkVipStatus();
+            calculateEarnings();
+            runningIndicator.classList.add('paused');
+        }
+
+        function checkVipStatus() {
+            const saved = localStorage.getItem('vipUnlocked');
+            if (saved === 'true') {
+                activateVip();
+            }
+        }
+
+        function activateVip() {
+            isVip = true;
+            premiumSection.classList.add('hidden');
+            vipBadge.classList.remove('hidden');
+            displayCard.classList.add('vip-active');
+            localStorage.setItem('vipUnlocked', 'true');
+        }
+
+        function deactivateVip() {
+            isVip = false;
+            premiumSection.classList.remove('hidden');
+            vipBadge.classList.add('hidden');
+            displayCard.classList.remove('vip-active');
+            localStorage.removeItem('vipUnlocked');
+        }
+
+        function showModal() {
+            unlockModal.classList.add('active');
+            codeInput.value = '';
+            codeInput.focus();
+        }
+
+        function hideModal() {
+            unlockModal.classList.remove('active');
+        }
+
+        function verifyCode() {
+            const code = codeInput.value.trim().toUpperCase();
+            if (code === VIP_CODE) {
+                activateVip();
+                hideModal();
+                shareToast.textContent = '🎉 VIP已激活！享受高级特效吧！';
+                shareToast.classList.add('show');
+                setTimeout(() => shareToast.classList.remove('show'), 2500);
+                triggerCelebration();
+            } else {
+                shareToast.textContent = '❌ 解锁码错误，请重试';
+                shareToast.classList.add('show');
+                setTimeout(() => shareToast.classList.remove('show'), 2000);
+            }
+        }
+
+        function triggerCelebration() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = window.innerHeight * 0.3 + Math.random() * window.innerHeight * 0.3;
+                    createFirework(x, y);
+                }, i * 100);
+            }
+        }
 
         function calculateEarnings() {
             const salary = parseFloat(monthlySalaryInput.value) || 0;
@@ -673,13 +966,16 @@
         }
 
         function createSparkle(x, y) {
-            for (let i = 0; i < 5; i++) {
+            const count = isVip ? 10 : 5;
+            for (let i = 0; i < count; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle';
-                sparkle.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
-                sparkle.style.top = (y + (Math.random() - 0.5) * 80) + 'px';
-                sparkle.style.width = (5 + Math.random() * 10) + 'px';
+                sparkle.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+                sparkle.style.top = (y + (Math.random() - 0.5) * 100) + 'px';
+                sparkle.style.width = (5 + Math.random() * 15) + 'px';
                 sparkle.style.height = sparkle.style.width;
+                const colors = ['#ffd700', '#ff6b00', '#ff0066', '#00ff99'];
+                sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
                 coinContainer.appendChild(sparkle);
 
                 setTimeout(() => {
@@ -701,25 +997,48 @@
             }, 1000);
         }
 
+        function createFirework(x, y) {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffd700'];
+            const particleCount = isVip ? 40 : 20;
+            const radius = isVip ? 150 : 80;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 6px ${particle.style.background}`;
+
+                const angle = (i / particleCount) * Math.PI * 2;
+                const dist = radius * (0.5 + Math.random() * 0.5);
+                const fx = Math.cos(angle) * dist;
+                const fy = Math.sin(angle) * dist;
+                particle.style.setProperty('--fx', fx + 'px');
+                particle.style.setProperty('--fy', fy + 'px');
+                particle.style.animation = `firework ${1 + Math.random()}s ease-out forwards`;
+
+                coinContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 2000);
+            }
+        }
+
         function spawnCoins() {
             const now = Date.now();
             const displayRect = displayCard.getBoundingClientRect();
             const x = displayRect.left + displayRect.width / 2;
             const y = displayRect.top + displayRect.height / 2;
 
-            if (isSlacking) {
-                if (now - lastCoinTime > 800) {
+            const interval = isVip ? (isSlacking ? 500 : 200) : (isSlacking ? 800 : 300);
+            if (now - lastCoinTime > interval) {
+                const coinCount = isVip ? 2 : 1;
+                for (let i = 0; i < coinCount; i++) {
                     createCoin(x, y);
-                    lastCoinTime = now;
                 }
-            } else {
-                if (now - lastCoinTime > 300) {
-                    createCoin(x, y);
-                    if (Math.random() < 0.3) {
-                        createSparkle(x, y);
-                    }
-                    lastCoinTime = now;
+                if (Math.random() < 0.4) {
+                    createSparkle(x, y);
                 }
+                lastCoinTime = now;
             }
         }
 
@@ -735,25 +1054,31 @@
             const x = displayRect.left + displayRect.width / 2;
             const y = displayRect.top + displayRect.height / 2;
 
-            const coinCount = Math.min(5 + criticalCombo * 2, 20);
+            const baseCount = isVip ? 10 : 5;
+            const coinCount = Math.min(baseCount + criticalCombo * 3, isVip ? 30 : 20);
             for (let i = 0; i < coinCount; i++) {
                 setTimeout(() => {
                     createCoin(
-                        x + (Math.random() - 0.5) * 150,
-                        y + (Math.random() - 0.5) * 50,
+                        x + (Math.random() - 0.5) * 200,
+                        y + (Math.random() - 0.5) * 100,
                         true
                     );
-                }, i * 50);
+                }, i * 30);
             }
 
             createSparkle(x, y);
 
+            if (isVip) {
+                createFirework(x, y);
+            }
+
             let critText = '💥 暴击!';
             if (criticalCombo >= 3) critText = '🔥 连击 x' + criticalCombo + '!';
             if (criticalCombo >= 5) critText = '⭐ 超必杀 x' + criticalCombo + '!';
-            createCriticalText(x - 50, y - 50, critText);
+            if (criticalCombo >= 8) critText = '🏆 传说暴击 x' + criticalCombo + '!';
+            createCriticalText(x - 70, y - 50, critText);
 
-            totalEarningsEl.style.transform = 'scale(1.2)';
+            totalEarningsEl.style.transform = 'scale(1.25)';
             setTimeout(() => {
                 totalEarningsEl.style.transform = 'scale(1)';
             }, 200);
@@ -774,14 +1099,9 @@
 
             const earningsDiff = totalEarnings - previousEarnings;
 
-            if (isSlacking) {
-                if (Math.random() < 0.01) {
-                    triggerCriticalHit();
-                }
-            } else {
-                if (Math.random() < 0.005) {
-                    triggerCriticalHit();
-                }
+            const critChance = isVip ? (isSlacking ? 0.02 : 0.015) : (isSlacking ? 0.01 : 0.005);
+            if (Math.random() < critChance) {
+                triggerCriticalHit();
             }
 
             if (earningsDiff > earningsPerSecond * 0.5) {
@@ -863,7 +1183,6 @@
             try {
                 const text = `💰 我的月薪计算器\n月薪: ¥${monthlySalaryInput.value}\n每秒: ${perSecondEl.textContent}\n已赚: ${totalEarningsEl.textContent}\n\n摸鱼必备 | 月薪计算器`;
 
-
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(text);
                 }
@@ -906,9 +1225,17 @@
         themeBtn.addEventListener('click', toggleTheme);
         modeBtn.addEventListener('click', toggleMode);
         shareBtn.addEventListener('click', shareScreen);
+        unlockBtn.addEventListener('click', showModal);
+        confirmBtn.addEventListener('click', verifyCode);
+        cancelBtn.addEventListener('click', hideModal);
+        unlockModal.addEventListener('click', (e) => {
+            if (e.target === unlockModal) hideModal();
+        });
+        codeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyCode();
+        });
 
-        runningIndicator.classList.add('paused');
-        calculateEarnings();
+        init();
     </script>
 </body>
 </html>
