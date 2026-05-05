@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>月薪计算器 - 每秒赚多少</title>
+    <title>💰 爆金币 - 月薪计算器</title>
     <style>
         :root {
             --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -16,9 +16,8 @@
             --border-color: rgba(255, 255, 255, 0.1);
             --input-bg: rgba(255, 255, 255, 0.05);
             --shadow-color: rgba(255, 215, 0, 0.2);
-            --shadow-gold: rgba(74, 222, 128, 0.4);
-            --shadow-orange: rgba(249, 115, 22, 0.4);
-            --shadow-red: rgba(239, 68, 68, 0.4);
+            --success: #4ade80;
+            --danger: #ef4444;
         }
 
         [data-theme="light"] {
@@ -32,38 +31,76 @@
             --border-color: rgba(0, 0, 0, 0.1);
             --input-bg: rgba(0, 0, 0, 0.05);
             --shadow-color: rgba(245, 158, 11, 0.2);
-            --shadow-gold: rgba(34, 197, 94, 0.4);
-            --shadow-orange: rgba(249, 115, 22, 0.4);
-            --shadow-red: rgba(239, 68, 68, 0.4);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
-            transition: background 0.3s ease, color 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .coin-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .coin {
+            position: absolute;
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            border-radius: 50%;
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: coinFall 1.5s ease-in forwards;
+        }
+
+        .coin::after {
+            content: '¥';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #b8860b;
+        }
+
+        @keyframes coinFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.5); }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: sparkle 0.6s ease-out forwards;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 1; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0); }
         }
 
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         .header {
             text-align: center;
-            padding: 30px 0;
+            padding: 20px 0;
         }
 
         .header h1 {
@@ -73,37 +110,292 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
         }
 
-        .header p {
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 25px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+            color: #000;
+            font-weight: bold;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
             color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .display-card {
+            background: var(--bg-card-solid);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            margin-bottom: 20px;
+        }
+
+        .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px var(--shadow-color);
+            transition: transform 0.1s;
+        }
+
+        .amount.pulse { transform: scale(1.05); }
+
+        .amount-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-box .value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+            color: #000;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-dark));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.75rem;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .person-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .person-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .person-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .person-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-gold { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        .badge-silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .badge-bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ranking-pos {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
             font-size: 0.9rem;
         }
 
-        .vip-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #ffd700, #ff6b00);
-            color: #111;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 10px;
-            animation: glow 2s ease-in-out infinite;
+        .ranking-info {
+            flex: 1;
         }
 
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px #ffd700; }
-            50% { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff6b00; }
+        .ranking-name {
+            font-weight: bold;
+        }
+
+        .ranking-rate {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .ranking-amount {
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        .slacking-timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+            text-align: center;
+            font-variant-numeric: tabular-nums;
         }
 
         .toolbar {
             display: flex;
-            justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
+            justify-content: center;
         }
 
         .toolbar-btn {
@@ -124,291 +416,95 @@
             border: 1px solid var(--border-color);
         }
 
-        .btn-theme:hover {
-            background: var(--accent-gold);
-            color: #000;
-        }
+        .btn-theme:hover { background: var(--accent-gold); color: #000; }
 
-        .btn-mode {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-mode.active {
-            background: linear-gradient(135deg, #f97316, #ea580c);
+        .share-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #4ade80, #22c55e);
             color: #fff;
-            border-color: transparent;
-        }
-
-        .btn-mode.slacking.active {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: #fff;
-            border-color: transparent;
-        }
-
-        .btn-share {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: #fff;
-            border: none;
-        }
-
-        .btn-share:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .input-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            opacity: 0;
             transition: all 0.3s ease;
+            z-index: 2000;
         }
 
-        .input-group {
-            margin-bottom: 20px;
+        .share-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
-        .input-group:last-child {
-            margin-bottom: 0;
+        .floating-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            z-index: 999;
+            border: 1px solid rgba(255, 215, 0, 0.3);
         }
 
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .floating-banner.hidden { display: none; }
+
+        .banner-title {
+            font-size: 16px;
+            font-weight: bold;
             margin-bottom: 8px;
         }
 
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-            background: var(--input-bg);
-        }
-
-        .input-group input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.7;
-        }
-
-        .display-card {
-            background: var(--bg-card-solid);
-            border-radius: 24px;
-            padding: 30px;
-            margin-bottom: 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 10px 40px var(--shadow-color);
-            transition: all 0.3s ease;
-        }
-
-        .display-card.vip-active {
-            border: 2px solid rgba(255, 107, 0, 0.6);
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.3);
-        }
-
-        .earnings-label {
-            font-size: 0.9rem;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .banner-subtitle {
+            font-size: 12px;
+            color: #ccc;
             margin-bottom: 10px;
         }
 
-        .earnings-amount {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            text-shadow: 0 0 30px var(--shadow-color);
-            transition: transform 0.1s ease;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .earnings-amount.pulse {
-            transform: scale(1.08);
-        }
-
-        .per-second {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-top: 15px;
-        }
-
-        .per-second span {
-            color: var(--accent-gold);
-            font-weight: 600;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card .label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .stat-card .value {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px;
+        .btn-unlock-banner {
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
+            color: #000;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-start {
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            color: #fff;
-        }
-
-        .btn-start:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px var(--shadow-gold);
-        }
-
-        .btn-pause {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #fff;
-        }
-
-        .btn-pause:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px var(--shadow-orange);
-        }
-
-        .btn-reset {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: #fff;
-        }
-
-        .btn-reset:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px var(--shadow-red);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .premium-section {
-            margin-top: 30px;
-            margin-bottom: 30px;
-        }
-
-        .premium-section.hidden {
-            display: none;
-        }
-
-        .premium-card {
-            background: #1a1a2e;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #ffd700;
-        }
-
-        [data-theme="light"] .premium-card {
-            background: #fff5e6;
-        }
-
-        .premium-card h3 {
-            color: #ffd700;
-            margin: 0 0 15px 0;
-        }
-
-        .premium-features {
-            color: #eee;
-            text-align: left;
-            margin: 15px auto;
-            max-width: 300px;
-            line-height: 1.8;
-            list-style: none;
-            padding: 0;
-        }
-
-        [data-theme="light"] .premium-features {
-            color: #333;
-        }
-
-        .premium-features li {
-            margin-bottom: 8px;
-        }
-
-        .btn-unlock {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #111;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 10px;
             font-weight: bold;
+            width: 100%;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .btn-unlock:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 25px rgba(255, 215, 0, 0.5);
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        .premium-note {
+        .vip-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ff6b00);
+            color: #111;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 12px;
-            color: #aaa;
-            margin-top: 10px;
+            font-weight: bold;
+            animation: glow 2s ease-in-out infinite;
         }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #ffd700; }
+            50% { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff6b00; }
+        }
+
+        .vip-badge.hidden { display: none; }
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
@@ -431,12 +527,6 @@
             max-width: 400px;
             width: 90%;
             border: 2px solid var(--accent-gold);
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1);
         }
 
         .modal h2 {
@@ -458,11 +548,6 @@
             letter-spacing: 2px;
         }
 
-        .modal-input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
         .modal-buttons {
             display: flex;
             gap: 10px;
@@ -478,243 +563,61 @@
             cursor: pointer;
         }
 
-        .btn-confirm {
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            color: #fff;
+        .btn-confirm { background: linear-gradient(135deg, #4ade80, #22c55e); color: #fff; }
+        .btn-cancel { background: #666; color: #fff; }
+
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        .btn-cancel {
-            background: #666;
-            color: #fff;
-        }
-
-        .coin-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1000;
-        }
-
-        .coin {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            border-radius: 50%;
-            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), 0 0 10px rgba(255, 215, 0, 0.5);
-            animation: coinFall 1.5s ease-in forwards;
-        }
-
-        .coin.critical {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ffd700, #ff8c00, #ff6347);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 100, 0, 0.5);
-        }
-
-        .coin::after {
-            content: '¥';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            font-weight: bold;
-            color: #b8860b;
-        }
-
-        .coin.critical::after {
-            font-size: 20px;
-        }
-
-        @keyframes coinFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg) scale(0.5);
-            }
-        }
-
-        @keyframes coinBurst {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1.5) rotate(0deg);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(360deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(calc(var(--tx) * 3), calc(var(--ty) * 3 + 200px)) scale(0.3) rotate(720deg);
-            }
-        }
-
-        .coin.critical {
-            animation: coinBurst 1s ease-out forwards;
-        }
-
-        .sparkle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ffd700;
-            border-radius: 50%;
-            animation: sparkle 0.8s ease-out forwards;
-        }
-
-        @keyframes sparkle {
-            0% {
-                opacity: 1;
-                transform: scale(0);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0);
-            }
-        }
-
-        @keyframes criticalText {
-            0% {
-                opacity: 0;
-                transform: scale(0.5) translateY(0);
-            }
-            20% {
-                opacity: 1;
-                transform: scale(1.2) translateY(-20px);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(1) translateY(-80px);
-            }
-        }
-
-        .critical-text {
-            position: absolute;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ff6347;
-            text-shadow: 0 0 10px rgba(255, 99, 71, 0.8), 0 0 20px rgba(255, 99, 71, 0.5);
-            animation: criticalText 1s ease-out forwards;
-            pointer-events: none;
-            z-index: 1001;
-        }
-
-        .firework {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        @keyframes firework {
-            0% {
-                opacity: 1;
-                transform: translate(0, 0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(var(--fx), var(--fy)) scale(0.3);
-            }
-        }
-
-        .running-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #4ade80;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: blink 1s infinite;
-        }
-
-        .running-indicator.paused {
-            background: #f97316;
-            animation: none;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .mode-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 10px;
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #fff;
-        }
-
-        .mode-badge.slacking {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-
-        .share-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: 600;
-            opacity: 0;
+        .template-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
             transition: all 0.3s ease;
-            z-index: 2000;
         }
 
-        .share-toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        .template-item:hover {
+            border-color: var(--accent-gold);
         }
 
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.6rem;
-            }
+        .template-item.active {
+            border-color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
 
-            .earnings-amount {
-                font-size: 2.2rem;
-            }
+        .template-actions {
+            display: flex;
+            gap: 5px;
+        }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+        .template-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
 
-            .controls {
-                flex-wrap: wrap;
-            }
+        .btn-load { background: #4ade80; color: #fff; }
+        .btn-delete { background: #ef4444; color: #fff; }
 
-            .btn {
-                flex: 1 1 calc(50% - 5px);
-            }
-
-            .toolbar {
-                gap: 8px;
-            }
-
-            .toolbar-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .amount { font-size: 1.8rem; }
+            .tabs { gap: 5px; }
+            .tab-btn { padding: 8px 12px; font-size: 0.75rem; }
+            .input-row { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -735,144 +638,783 @@
 
     <div class="container">
         <div class="header">
-            <h1>💰 月薪计算器 <span class="vip-badge hidden" id="vipBadge">✨ VIP</span></h1>
-            <p>看看你每秒能赚多少钱</p>
+            <h1>💰 爆金币计算器 <span class="vip-badge hidden" id="vipBadge">✨ VIP</span></h1>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">实时薪资 | 攒钱目标 | 副业对比 | 摸鱼统计</p>
         </div>
 
         <div class="toolbar">
             <button class="toolbar-btn btn-theme" id="themeBtn">🌙 暗黑</button>
-            <button class="toolbar-btn btn-mode" id="modeBtn">💼 打工模式</button>
-            <button class="toolbar-btn btn-share" id="shareBtn">📸 截图分享</button>
+            <button class="toolbar-btn btn-theme" id="saveTemplateBtn">💾 保存模板</button>
+            <button class="toolbar-btn btn-theme" id="loadTemplateBtn">📂 加载模板</button>
+            <button class="toolbar-btn btn-theme" id="shareBtn">📸 截图分享</button>
         </div>
 
-        <div class="input-card">
-            <div class="input-group">
-                <label>月薪金额 (元)</label>
-                <input type="number" id="monthlySalary" placeholder="请输入月薪" value="15000">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="salary">💰 薪资计算</button>
+            <button class="tab-btn" data-tab="spending">🛒 消费克制</button>
+            <button class="tab-btn" data-tab="compare">⚔️ 副业对比</button>
+            <button class="tab-btn" data-tab="goal">🎯 攒钱目标</button>
+            <button class="tab-btn" data-tab="realtime">⏱️ 真实时薪</button>
+            <button class="tab-btn" data-tab="slacking">🐟 摸鱼统计</button>
+            <button class="tab-btn" data-tab="ranking">🏆 内卷排行</button>
+        </div>
+
+        <div id="tab-salary" class="tab-content active">
+            <div class="card">
+                <div class="card-title">📊 输入你的薪资信息</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>月薪 (元)</label>
+                        <input type="number" id="salary" value="15000" oninput="calculateSalary()">
+                    </div>
+                    <div class="input-group">
+                        <label>每月工作天数</label>
+                        <input type="number" id="workDays" value="22" oninput="calculateSalary()">
+                    </div>
+                    <div class="input-group">
+                        <label>每日工作小时</label>
+                        <input type="number" id="workHours" value="8" oninput="calculateSalary()">
+                    </div>
+                </div>
             </div>
-            <div class="input-group">
-                <label>每月工作天数</label>
-                <input type="number" id="workDays" placeholder="请输入工作天数" value="22">
+
+            <div class="display-card">
+                <div class="amount" id="perSecondDisplay">¥0.00</div>
+                <div class="amount-label">每秒收入</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="perHourDisplay">¥0</div>
+                        <div class="label">时薪</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="perMinuteDisplay">¥0</div>
+                        <div class="label">分钟薪</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="perSecondSmallDisplay">¥0</div>
+                        <div class="label">秒薪</div>
+                    </div>
+                </div>
             </div>
-            <div class="input-group">
-                <label>每日工作小时数</label>
-                <input type="number" id="workHours" placeholder="请输入每日工作小时" value="8">
+
+            <div class="card">
+                <div class="card-title">⏰ 上班计时</div>
+                <div class="btn-group">
+                    <button class="btn btn-success" id="startSalaryBtn">▶ 开始计时</button>
+                    <button class="btn btn-danger" id="resetSalaryBtn">🔄 重置</button>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">已赚</div>
+                    <div class="amount" id="salaryEarned" style="font-size: 2rem;">¥0.00</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);" id="salaryWorkTime">工作 0时0分0秒</div>
+                </div>
             </div>
         </div>
 
-        <div class="display-card" id="displayCard">
-            <div class="earnings-label">
-                <span class="running-indicator" id="runningIndicator"></span>
-                当前总收益
-                <span class="mode-badge" id="modeBadge">打工</span>
+        <div id="tab-spending" class="tab-content">
+            <div class="card">
+                <div class="card-title">🛒 想要这个东西？算算要工作多久</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>商品价格 (元)</label>
+                        <input type="number" id="itemPrice" placeholder="输入商品价格" oninput="calculateSpending()">
+                    </div>
+                    <div class="input-group">
+                        <label>商品名称</label>
+                        <input type="text" id="itemName" placeholder="比如：iPhone 15" oninput="calculateSpending()">
+                    </div>
+                </div>
             </div>
-            <div class="earnings-amount" id="totalEarnings">¥0.00</div>
-            <div class="per-second">
-                每秒收入 <span id="perSecond">¥0.00</span>
+
+            <div class="display-card">
+                <div class="amount" id="spendingResult">¥0</div>
+                <div class="amount-label">需要工作这么多秒</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="spendingHours">0</div>
+                        <div class="label">小时</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="spendingDays">0</div>
+                        <div class="label">天</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="spendingMoney">¥0</div>
+                        <div class="label">时薪价值</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💡 克制小建议</div>
+                <p style="color: var(--text-secondary); line-height: 1.6;" id="restrainTip">
+                    输入商品价格，看看这个东西值多少工作时长
+                </p>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="label">今日已赚</div>
-                <div class="value" id="todayEarnings">¥0.00</div>
+        <div id="tab-compare" class="tab-content">
+            <div class="card">
+                <div class="card-title">⚔️ 多身份收入对比</div>
+                <div id="identityList"></div>
+                <div class="btn-group" style="margin-top: 15px;">
+                    <button class="btn btn-primary" id="addIdentityBtn">➕ 添加身份</button>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="label">工作时长</div>
-                <div class="value" id="workTime">0时0分0秒</div>
+
+            <div class="card">
+                <div class="card-title">📊 对比结果</div>
+                <div id="compareResults"></div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn btn-start" id="startBtn">开始</button>
-            <button class="btn btn-pause" id="pauseBtn">暂停</button>
-            <button class="btn btn-reset" id="resetBtn">重置</button>
+        <div id="tab-goal" class="tab-content">
+            <div class="card">
+                <div class="card-title">🎯 设置攒钱目标</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>目标名称</label>
+                        <input type="text" id="goalName" placeholder="比如：买房首付" value="旅行基金">
+                    </div>
+                    <div class="input-group">
+                        <label>目标金额 (元)</label>
+                        <input type="number" id="goalAmount" placeholder="输入目标金额" value="50000" oninput="calculateGoal()">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>每月薪资 (元)</label>
+                        <input type="number" id="goalSalary" value="15000" oninput="calculateGoal()">
+                    </div>
+                    <div class="input-group">
+                        <label>每月能攒 (元)</label>
+                        <input type="number" id="goalSavings" placeholder="每月能存多少钱" value="5000" oninput="calculateGoal()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="display-card">
+                <div class="amount" id="goalProgress">0%</div>
+                <div class="amount-label">目标进度</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="goalProgressBar" style="width: 0%;">0%</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="goalPerDay">¥0</div>
+                        <div class="label">每日需攒</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="goalPerMonth">¥0</div>
+                        <div class="label">每月需攒</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="goalDaysLeft">0</div>
+                        <div class="label">预计天数</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="premium-section" id="premiumSection">
-            <div class="premium-card">
-                <h3>打工人专属「搞钱buff」已上线！</h3>
-                <ul class="premium-features">
-                    <li>✅ 金币暴击+烟花特效，每一秒都在爽</li>
-                    <li>✅ 自定义工作时长，精准算清你的「摸鱼成本」</li>
-                    <li>✅ 无广告纯净模式，沉浸式体验搞钱快乐</li>
-                    <li>✅ 专属打工人音效，进账即放「恭喜发财」</li>
-                </ul>
-                <button class="btn-unlock" id="unlockBtn">👉 19.9元解锁，爽一整年</button>
-                <p class="premium-note">付完款截图发给我，直接给你开通权限 ✨</p>
+        <div id="tab-realtime" class="tab-content">
+            <div class="card">
+                <div class="card-title">⏱️ 真实时薪计算</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>月薪 (元)</label>
+                        <input type="number" id="realSalary" value="15000" oninput="calculateRealWage()">
+                    </div>
+                    <div class="input-group">
+                        <label>每月工作天数</label>
+                        <input type="number" id="realDays" value="22" oninput="calculateRealWage()">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>每日上班时长 (小时)</label>
+                        <input type="number" id="realHours" value="8" oninput="calculateRealWage()">
+                    </div>
+                    <div class="input-group">
+                        <label>每日加班时长 (小时)</label>
+                        <input type="number" id="realOvertime" value="0" oninput="calculateRealWage()">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>单程通勤时长 (分钟)</label>
+                        <input type="number" id="realCommute" value="30" oninput="calculateRealWage()">
+                    </div>
+                    <div class="input-group">
+                        <label>午休时间 (分钟)</label>
+                        <input type="number" id="realBreak" value="60" oninput="calculateRealWage()">
+                    </div>
+                </div>
             </div>
+
+            <div class="display-card">
+                <div class="amount" id="realHourlyWage">¥0</div>
+                <div class="amount-label">你的真实时薪</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="realNominal">¥0</div>
+                        <div class="label">名义时薪</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="realWasteHours">0h</div>
+                        <div class="label">每日浪费</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="realWastePercent">0%</div>
+                        <div class="label">时间损耗</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💡 分析结论</div>
+                <p style="color: var(--text-secondary); line-height: 1.6;" id="realWageTip">
+                    你的真实时薪 = 月薪 ÷ 实际投入工作时间
+                </p>
+            </div>
+        </div>
+
+        <div id="tab-slacking" class="tab-content">
+            <div class="display-card">
+                <div class="slacking-timer" id="slackingTimer">00:00:00</div>
+                <div class="amount-label">摸鱼时长</div>
+                <div style="margin-top: 20px;">
+                    <div class="amount" id="slackingMoney" style="font-size: 1.5rem;">¥0.00</div>
+                    <div class="amount-label">这段摸鱼"赚"了</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🐟 摸鱼计时</div>
+                <div class="btn-group">
+                    <button class="btn btn-success" id="startSlackingBtn">▶ 开始摸鱼</button>
+                    <button class="btn btn-danger" id="stopSlackingBtn">⏹ 停止</button>
+                    <button class="btn btn-primary" id="resetSlackingBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 今日摸鱼统计</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="totalSlackingTime">0h</div>
+                        <div class="label">总摸鱼时长</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="totalSlackingMoney">¥0</div>
+                        <div class="label">总摸鱼收益</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-ranking" class="tab-content">
+            <div class="card">
+                <div class="card-title">🏆 内卷排行榜</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>添加选手</label>
+                        <input type="text" id="rankingName" placeholder="名字">
+                    </div>
+                    <div class="input-group">
+                        <label>月薪 (元)</label>
+                        <input type="number" id="rankingSalary" placeholder="月薪">
+                    </div>
+                    <div class="input-group" style="justify-content: flex-end;">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" id="addRankingBtn">添加</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-list" id="rankingList">
+                <p style="color: var(--text-secondary); text-align: center;">添加选手开始PK</p>
+            </div>
+        </div>
+
+        <div id="premiumSection" class="card" style="margin-top: 30px;">
+            <div class="card-title">✨ 打工人专属「搞钱buff」</div>
+            <ul style="color: var(--text-secondary); line-height: 2; padding-left: 20px;">
+                <li>✅ 金币暴击+烟花特效</li>
+                <li>✅ 高级音效体验</li>
+                <li>✅ 多模板保存</li>
+                <li>✅ 无广告纯净模式</li>
+            </ul>
+            <button class="btn btn-primary" id="unlockBtn" style="width: 100%; margin-top: 15px;">👉 19.9元解锁高级版</button>
         </div>
     </div>
 
+    <div id="floatingBanner" class="floating-banner">
+        <div class="banner-title">💰 解锁高级版享全部特效</div>
+        <div class="banner-subtitle">一杯奶茶钱，永久享受打工人爽感</div>
+        <button class="btn-unlock-banner" id="bannerUnlockBtn">立即解锁</button>
+    </div>
+
     <script>
-        const monthlySalaryInput = document.getElementById('monthlySalary');
-        const workDaysInput = document.getElementById('workDays');
-        const workHoursInput = document.getElementById('workHours');
-        const totalEarningsEl = document.getElementById('totalEarnings');
-        const perSecondEl = document.getElementById('perSecond');
-        const todayEarningsEl = document.getElementById('todayEarnings');
-        const workTimeEl = document.getElementById('workTime');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const runningIndicator = document.getElementById('runningIndicator');
         const coinContainer = document.getElementById('coinContainer');
-        const themeBtn = document.getElementById('themeBtn');
-        const modeBtn = document.getElementById('modeBtn');
-        const modeBadge = document.getElementById('modeBadge');
-        const shareBtn = document.getElementById('shareBtn');
         const shareToast = document.getElementById('shareToast');
-        const displayCard = document.getElementById('displayCard');
-        const premiumSection = document.getElementById('premiumSection');
-        const unlockBtn = document.getElementById('unlockBtn');
+        let audioUnlocked = false;
+        let isVip = false;
+        const VIP_CODE = 'VIP2026';
+
+        let salaryPerSecond = 0;
+        let salaryEarned = 0;
+        let salaryStartTime = null;
+        let salaryPausedTime = 0;
+        let isSalaryRunning = false;
+        let salaryAnimationId = null;
+
+        let slackingStartTime = null;
+        let slackingElapsed = 0;
+        let isSlackingRunning = false;
+        let slackingAnimationId = null;
+        let totalSlackingTime = 0;
+
+        let identities = [];
+        let rankingData = [];
+        let isDarkTheme = true;
+
+        document.addEventListener('click', function unlockAudio() {
+            if (!audioUnlocked) {
+                audioUnlocked = true;
+                document.removeEventListener('click', unlockAudio);
+            }
+        });
+
+        function playCoinSound() {
+            if (audioUnlocked && isVip) {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3');
+                audio.play();
+            }
+        }
+
+        function createCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+            coin.style.top = y + 'px';
+            coinContainer.appendChild(coin);
+            setTimeout(() => coin.remove(), 1500);
+        }
+
+        function createSparkle(x, y) {
+            for (let i = 0; i < 3; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
+                sparkle.style.top = (y + (Math.random() - 0.5) * 60) + 'px';
+                coinContainer.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 600);
+            }
+        }
+
+        function spawnCoins() {
+            const displayCard = document.querySelector('.display-card');
+            if (!displayCard) return;
+            const rect = displayCard.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top;
+            createCoin(x, y);
+            createSparkle(x, y);
+            playCoinSound();
+        }
+
+        let lastSpawnTime = 0;
+
+        function formatMoney(amount) {
+            if (amount >= 10000) return '¥' + amount.toFixed(2);
+            if (amount >= 100) return '¥' + amount.toFixed(2);
+            if (amount >= 1) return '¥' + amount.toFixed(2);
+            return '¥' + amount.toFixed(4);
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h}时${m}分${s}秒`;
+        }
+
+        function calculateSalary() {
+            const salary = parseFloat(document.getElementById('salary').value) || 0;
+            const days = parseFloat(document.getElementById('workDays').value) || 1;
+            const hours = parseFloat(document.getElementById('workHours').value) || 1;
+            const totalSeconds = days * hours * 3600;
+
+            salaryPerSecond = salary / totalSeconds;
+
+            document.getElementById('perHourDisplay').textContent = '¥' + (salaryPerSecond * 3600).toFixed(2);
+            document.getElementById('perMinuteDisplay').textContent = '¥' + (salaryPerSecond * 60).toFixed(2);
+            document.getElementById('perSecondSmallDisplay').textContent = '¥' + salaryPerSecond.toFixed(4);
+            document.getElementById('perSecondDisplay').textContent = '¥' + salaryPerSecond.toFixed(4);
+        }
+
+        function updateSalaryTime(currentTime) {
+            if (!isSalaryRunning) return;
+
+            if (!salaryStartTime) {
+                salaryStartTime = currentTime - salaryPausedTime * 1000;
+            }
+
+            const elapsed = (currentTime - salaryStartTime) / 1000;
+            salaryEarned = elapsed * salaryPerSecond;
+            salaryPausedTime = elapsed;
+
+            document.getElementById('salaryEarned').textContent = formatMoney(salaryEarned);
+            document.getElementById('salaryWorkTime').textContent = '工作 ' + formatTime(elapsed);
+
+            const amountEl = document.getElementById('salaryEarned');
+            amountEl.classList.add('pulse');
+            setTimeout(() => amountEl.classList.remove('pulse'), 50);
+
+            const now = Date.now();
+            if (now - lastSpawnTime > (isVip ? 300 : 500)) {
+                if (Math.random() < 0.3) {
+                    spawnCoins();
+                }
+                lastSpawnTime = now;
+            }
+
+            salaryAnimationId = requestAnimationFrame(updateSalaryTime);
+        }
+
+        document.getElementById('startSalaryBtn').addEventListener('click', () => {
+            if (isSalaryRunning) return;
+            calculateSalary();
+            isSalaryRunning = true;
+            salaryAnimationId = requestAnimationFrame(updateSalaryTime);
+        });
+
+        document.getElementById('resetSalaryBtn').addEventListener('click', () => {
+            isSalaryRunning = false;
+            if (salaryAnimationId) cancelAnimationFrame(salaryAnimationId);
+            salaryEarned = 0;
+            salaryPausedTime = 0;
+            salaryStartTime = null;
+            document.getElementById('salaryEarned').textContent = '¥0.00';
+            document.getElementById('salaryWorkTime').textContent = '工作 0时0分0秒';
+        });
+
+        function calculateSpending() {
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const name = document.getElementById('itemName').value || '这个东西';
+            const seconds = price / salaryPerSecond;
+            const hours = seconds / 3600;
+            const days = hours / (parseFloat(document.getElementById('workDays').value) || 1);
+
+            document.getElementById('spendingResult').textContent = Math.ceil(seconds).toLocaleString() + '秒';
+            document.getElementById('spendingHours').textContent = hours.toFixed(1);
+            document.getElementById('spendingDays').textContent = Math.ceil(days);
+            document.getElementById('spendingMoney').textContent = '¥' + (salaryPerSecond * 3600).toFixed(2) + '/h';
+
+            const tips = [
+                `买${name}需要工作 ${hours.toFixed(1)} 小时`,
+                `${name} = ${Math.ceil(days)} 个工作日`,
+                `想想${hours.toFixed(1)}小时你能做多少事？`,
+                `这个${name}真的值得吗？`
+            ];
+            document.getElementById('restrainTip').textContent = tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        function addIdentity() {
+            const name = prompt('输入身份名称（如：主业、副业1）：') || '新身份';
+            const salary = parseFloat(prompt('输入月薪：') || '0');
+            const days = parseFloat(prompt('每月工作天数：') || '22');
+            const hours = parseFloat(prompt('每日工作小时：') || '8');
+
+            identities.push({ name, salary, days, hours, perSecond: salary / (days * hours * 3600) });
+            renderIdentities();
+        }
+
+        function removeIdentity(index) {
+            identities.splice(index, 1);
+            renderIdentities();
+        }
+
+        function renderIdentities() {
+            const list = document.getElementById('identityList');
+            const results = document.getElementById('compareResults');
+
+            if (identities.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">点击添加身份开始对比</p>';
+                results.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = identities.map((id, i) => `
+                <div class="person-card">
+                    <div class="person-header">
+                        <span class="person-name">${id.name}</span>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="removeIdentity(${i})">删除</button>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>月薪</label>
+                            <input type="number" value="${id.salary}" onchange="identities[${i}].salary=this.value; identities[${i}].perSecond=this.value/(identities[${i}].days*identities[${i}].hours*3600); renderIdentities();">
+                        </div>
+                        <div class="input-group">
+                            <label>天数</label>
+                            <input type="number" value="${id.days}" onchange="identities[${i}].days=this.value; identities[${i}].perSecond=identities[${i}].salary/(this.value*identities[${i}].hours*3600); renderIdentities();">
+                        </div>
+                        <div class="input-group">
+                            <label>小时</label>
+                            <input type="number" value="${id.hours}" onchange="identities[${i}].hours=this.value; identities[${i}].perSecond=identities[${i}].salary/(identities[${i}].days*this.value*3600); renderIdentities();">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const sorted = [...identities].sort((a, b) => b.perSecond - a.perSecond);
+            results.innerHTML = sorted.map((id, i) => `
+                <div class="ranking-item">
+                    <div class="ranking-pos ${i === 0 ? 'badge-gold' : i === 1 ? 'badge-silver' : 'badge-bronze'}" style="${i === 0 ? 'background: gold;' : i === 1 ? 'background: silver;' : 'background: #cd7f32;'} color: ${i < 2 ? '#000' : '#fff'};">
+                        ${i + 1}
+                    </div>
+                    <div class="ranking-info">
+                        <div class="ranking-name">${id.name}</div>
+                        <div class="ranking-rate">每秒 ¥${id.perSecond.toFixed(4)} | 时薪 ¥${(id.perSecond * 3600).toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('addIdentityBtn').addEventListener('click', addIdentity);
+
+        function calculateGoal() {
+            const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 1;
+            const monthlySavings = parseFloat(document.getElementById('goalSavings').value) || 0;
+            const daysInMonth = 30;
+
+            const progress = monthlySavings > 0 ? Math.min((monthlySavings / goalAmount) * 100, 100) : 0;
+            const perDay = goalAmount / (monthlySavings > 0 ? Math.ceil(goalAmount / monthlySavings) * daysInMonth : 1);
+            const daysLeft = monthlySavings > 0 ? Math.ceil(goalAmount / monthlySavings) : 0;
+
+            document.getElementById('goalProgress').textContent = progress.toFixed(1) + '%';
+            document.getElementById('goalProgressBar').style.width = progress + '%';
+            document.getElementById('goalProgressBar').textContent = progress.toFixed(1) + '%';
+            document.getElementById('goalPerDay').textContent = '¥' + perDay.toFixed(0);
+            document.getElementById('goalPerMonth').textContent = '¥' + monthlySavings;
+            document.getElementById('goalDaysLeft').textContent = daysLeft;
+        }
+
+        function calculateRealWage() {
+            const salary = parseFloat(document.getElementById('realSalary').value) || 0;
+            const days = parseFloat(document.getElementById('realDays').value) || 1;
+            const hours = parseFloat(document.getElementById('realHours').value) || 1;
+            const overtime = parseFloat(document.getElementById('realOvertime').value) || 0;
+            const commute = (parseFloat(document.getElementById('realCommute').value) || 0) / 60;
+            const rest = (parseFloat(document.getElementById('realBreak').value) || 0) / 60;
+
+            const nominalHourly = salary / (days * hours);
+            const realHoursPerDay = hours + overtime + commute * 2;
+            const realHoursPerMonth = realHoursPerDay * days;
+            const realHourly = salary / realHoursPerMonth;
+            const wasteHours = realHoursPerDay - hours;
+            const wastePercent = (wasteHours / realHoursPerDay * 100);
+
+            document.getElementById('realHourlyWage').textContent = '¥' + realHourly.toFixed(2);
+            document.getElementById('realNominal').textContent = '¥' + nominalHourly.toFixed(2);
+            document.getElementById('realWasteHours').textContent = wasteHours.toFixed(1) + 'h';
+            document.getElementById('realWastePercent').textContent = wastePercent.toFixed(0) + '%';
+
+            let tip = `你的真实时薪 ¥${realHourly.toFixed(2)}，比名义时薪低 ${wastePercent.toFixed(0)}%`;
+            if (wastePercent > 30) {
+                tip += `。通勤和休息时间太多了，建议考虑就近工作或远程办公！`;
+            }
+            document.getElementById('realWageTip').textContent = tip;
+        }
+
+        function updateSlackingTimer(currentTime) {
+            if (!isSlackingRunning) return;
+
+            if (!slackingStartTime) {
+                slackingStartTime = currentTime;
+            }
+
+            const elapsed = (currentTime - slackingStartTime) / 1000;
+            const totalElapsed = slackingElapsed + elapsed;
+            const money = totalElapsed * salaryPerSecond;
+
+            const h = Math.floor(totalElapsed / 3600);
+            const m = Math.floor((totalElapsed % 3600) / 60);
+            const s = Math.floor(totalElapsed % 60);
+
+            document.getElementById('slackingTimer').textContent =
+                String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            document.getElementById('slackingMoney').textContent = formatMoney(money);
+
+            slackingAnimationId = requestAnimationFrame(updateSlackingTimer);
+        }
+
+        document.getElementById('startSlackingBtn').addEventListener('click', () => {
+            if (isSlackingRunning) return;
+            calculateSalary();
+            isSlackingRunning = true;
+            slackingStartTime = null;
+            slackingAnimationId = requestAnimationFrame(updateSlackingTimer);
+        });
+
+        document.getElementById('stopSlackingBtn').addEventListener('click', () => {
+            if (!isSlackingRunning) return;
+            isSlackingRunning = false;
+            if (slackingAnimationId) cancelAnimationFrame(slackingAnimationId);
+            const elapsed = slackingElapsed;
+            slackingElapsed += (performance.now() - slackingStartTime) / 1000;
+            totalSlackingTime = slackingElapsed;
+            document.getElementById('totalSlackingTime').textContent = formatTime(totalSlackingTime);
+            document.getElementById('totalSlackingMoney').textContent = formatMoney(totalSlackingTime * salaryPerSecond);
+        });
+
+        document.getElementById('resetSlackingBtn').addEventListener('click', () => {
+            isSlackingRunning = false;
+            if (slackingAnimationId) cancelAnimationFrame(slackingAnimationId);
+            slackingElapsed = 0;
+            slackingStartTime = null;
+            totalSlackingTime = 0;
+            document.getElementById('slackingTimer').textContent = '00:00:00';
+            document.getElementById('slackingMoney').textContent = '¥0.00';
+            document.getElementById('totalSlackingTime').textContent = '0h';
+            document.getElementById('totalSlackingMoney').textContent = '¥0';
+        });
+
+        function addRankingPerson() {
+            const name = document.getElementById('rankingName').value.trim();
+            const salary = parseFloat(document.getElementById('rankingSalary').value);
+            if (!name || !salary) return;
+
+            const days = parseFloat(prompt('每月工作天数：') || '22');
+            const hours = parseFloat(prompt('每日工作小时：') || '8');
+
+            rankingData.push({ name, salary, days, hours, perSecond: salary / (days * hours * 3600) });
+            document.getElementById('rankingName').value = '';
+            document.getElementById('rankingSalary').value = '';
+            renderRanking();
+        }
+
+        function removeRankingPerson(index) {
+            rankingData.splice(index, 1);
+            renderRanking();
+        }
+
+        function renderRanking() {
+            const list = document.getElementById('rankingList');
+
+            if (rankingData.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">添加选手开始PK</p>';
+                return;
+            }
+
+            const sorted = [...rankingData].sort((a, b) => b.perSecond - a.perSecond);
+
+            list.innerHTML = sorted.map((p, i) => `
+                <div class="ranking-item">
+                    <div class="ranking-pos ${i === 0 ? 'badge-gold' : i === 1 ? 'badge-silver' : 'badge-bronze'}" style="${i === 0 ? 'background: gold;' : i === 1 ? 'background: silver;' : 'background: #cd7f32;'} color: ${i < 2 ? '#000' : '#fff'};">
+                        ${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                    </div>
+                    <div class="ranking-info">
+                        <div class="ranking-name">${p.name}</div>
+                        <div class="ranking-rate">月薪 ¥${p.salary.toLocaleString()} | 每秒 ¥${p.perSecond.toFixed(4)}</div>
+                    </div>
+                    <div class="ranking-amount">¥${(p.perSecond * 3600).toFixed(2)}/h</div>
+                    <button class="btn btn-danger" style="padding: 5px 8px; font-size: 0.75rem;" onclick="removeRankingPerson(${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('addRankingBtn').addEventListener('click', addRankingPerson);
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+            document.getElementById('themeBtn').textContent = isDarkTheme ? '🌙 暗黑' : '☀️ 明亮';
+        });
+
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            const text = `💰 爆金币计算器\n月薪: ¥${document.getElementById('salary').value}\n每秒: ¥${salaryPerSecond.toFixed(4)}\n时薪: ¥${(salaryPerSecond * 3600).toFixed(2)}\n\n打工人必备！`;
+            try {
+                await navigator.clipboard.writeText(text);
+                shareToast.textContent = '已复制到剪贴板！';
+                shareToast.classList.add('show');
+                setTimeout(() => shareToast.classList.remove('show'), 2000);
+            } catch (e) {}
+        });
+
+        function saveTemplate() {
+            const name = prompt('输入模板名称：') || '我的模板';
+            const template = {
+                name,
+                salary: document.getElementById('salary').value,
+                workDays: document.getElementById('workDays').value,
+                workHours: document.getElementById('workHours').value
+            };
+            const templates = JSON.parse(localStorage.getItem('salaryTemplates') || '[]');
+            templates.push(template);
+            localStorage.setItem('salaryTemplates', JSON.stringify(templates));
+            shareToast.textContent = '模板已保存！';
+            shareToast.classList.add('show');
+            setTimeout(() => shareToast.classList.remove('show'), 2000);
+        }
+
+        function loadTemplate() {
+            const templates = JSON.parse(localStorage.getItem('salaryTemplates') || '[]');
+            if (templates.length === 0) {
+                alert('暂无保存的模板');
+                return;
+            }
+            const names = templates.map((t, i) => `${i + 1}. ${t.name}`).join('\n');
+            const idx = prompt(`选择模板：\n${names}\n\n输入编号：`);
+            if (idx && templates[idx - 1]) {
+                const t = templates[idx - 1];
+                document.getElementById('salary').value = t.salary;
+                document.getElementById('workDays').value = t.workDays;
+                document.getElementById('workHours').value = t.workHours;
+                calculateSalary();
+                shareToast.textContent = '模板已加载！';
+                shareToast.classList.add('show');
+                setTimeout(() => shareToast.classList.remove('show'), 2000);
+            }
+        }
+
+        document.getElementById('saveTemplateBtn').addEventListener('click', saveTemplate);
+        document.getElementById('loadTemplateBtn').addEventListener('click', loadTemplate);
+
         const unlockModal = document.getElementById('unlockModal');
         const codeInput = document.getElementById('codeInput');
         const confirmBtn = document.getElementById('confirmBtn');
         const cancelBtn = document.getElementById('cancelBtn');
         const vipBadge = document.getElementById('vipBadge');
-
-        let isRunning = false;
-        let totalEarnings = 0;
-        let earningsPerSecond = 0;
-        let startTime = null;
-        let pausedTime = 0;
-        let lastUpdate = null;
-        let animationFrameId = null;
-        let lastCoinTime = 0;
-        let isSlacking = false;
-        let isDarkTheme = true;
-        let criticalCombo = 0;
-        let lastCriticalTime = 0;
-        let isVip = false;
-        const VIP_CODE = 'VIP2026';
-
-        function init() {
-            checkVipStatus();
-            calculateEarnings();
-            runningIndicator.classList.add('paused');
-        }
+        const premiumSection = document.getElementById('premiumSection');
+        const floatingBanner = document.getElementById('floatingBanner');
+        const bannerUnlockBtn = document.getElementById('bannerUnlockBtn');
 
         function checkVipStatus() {
             const saved = localStorage.getItem('vipUnlocked');
             if (saved === 'true') {
                 activateVip();
+            } else {
+                floatingBanner.classList.remove('hidden');
             }
         }
 
         function activateVip() {
             isVip = true;
             premiumSection.classList.add('hidden');
+            floatingBanner.classList.add('hidden');
             vipBadge.classList.remove('hidden');
-            displayCard.classList.add('vip-active');
             localStorage.setItem('vipUnlocked', 'true');
-        }
-
-        function deactivateVip() {
-            isVip = false;
-            premiumSection.classList.remove('hidden');
-            vipBadge.classList.add('hidden');
-            displayCard.classList.remove('vip-active');
-            localStorage.removeItem('vipUnlocked');
         }
 
         function showModal() {
@@ -890,352 +1432,25 @@
             if (code === VIP_CODE) {
                 activateVip();
                 hideModal();
-                shareToast.textContent = '🎉 VIP已激活！享受高级特效吧！';
+                shareToast.textContent = '🎉 VIP已激活！';
                 shareToast.classList.add('show');
                 setTimeout(() => shareToast.classList.remove('show'), 2500);
-                triggerCelebration();
             } else {
-                shareToast.textContent = '❌ 解锁码错误，请重试';
+                shareToast.textContent = '❌ 解锁码错误';
                 shareToast.classList.add('show');
                 setTimeout(() => shareToast.classList.remove('show'), 2000);
             }
         }
 
-        function triggerCelebration() {
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    const x = Math.random() * window.innerWidth;
-                    const y = window.innerHeight * 0.3 + Math.random() * window.innerHeight * 0.3;
-                    createFirework(x, y);
-                }, i * 100);
-            }
-        }
-
-        function calculateEarnings() {
-            const salary = parseFloat(monthlySalaryInput.value) || 0;
-            const days = parseFloat(workDaysInput.value) || 1;
-            const hours = parseFloat(workHoursInput.value) || 1;
-
-            const totalSeconds = days * hours * 3600;
-            earningsPerSecond = salary / totalSeconds;
-
-            if (isSlacking) {
-                earningsPerSecond *= 0.5;
-            }
-
-            perSecondEl.textContent = '¥' + earningsPerSecond.toFixed(4);
-        }
-
-        function formatMoney(amount) {
-            if (amount >= 10000) {
-                return '¥' + amount.toFixed(2);
-            } else if (amount >= 100) {
-                return '¥' + amount.toFixed(2);
-            } else if (amount >= 1) {
-                return '¥' + amount.toFixed(2);
-            } else {
-                return '¥' + amount.toFixed(4);
-            }
-        }
-
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${hours}时${minutes}分${secs}秒`;
-        }
-
-        function createCoin(x, y, isCritical = false) {
-            const coin = document.createElement('div');
-            coin.className = 'coin' + (isCritical ? ' critical' : '');
-            coin.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
-            coin.style.top = y + 'px';
-
-            if (isCritical) {
-                const tx = (Math.random() - 0.5) * 200;
-                const ty = (Math.random() - 0.5) * 200 - 100;
-                coin.style.setProperty('--tx', tx + 'px');
-                coin.style.setProperty('--ty', ty + 'px');
-            }
-
-            coinContainer.appendChild(coin);
-
-            setTimeout(() => {
-                coin.remove();
-            }, isCritical ? 1000 : 1500);
-        }
-
-        function createSparkle(x, y) {
-            const count = isVip ? 10 : 5;
-            for (let i = 0; i < count; i++) {
-                const sparkle = document.createElement('div');
-                sparkle.className = 'sparkle';
-                sparkle.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
-                sparkle.style.top = (y + (Math.random() - 0.5) * 100) + 'px';
-                sparkle.style.width = (5 + Math.random() * 15) + 'px';
-                sparkle.style.height = sparkle.style.width;
-                const colors = ['#ffd700', '#ff6b00', '#ff0066', '#00ff99'];
-                sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                coinContainer.appendChild(sparkle);
-
-                setTimeout(() => {
-                    sparkle.remove();
-                }, 800);
-            }
-        }
-
-        function createCriticalText(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'critical-text';
-            el.textContent = text;
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            coinContainer.appendChild(el);
-
-            setTimeout(() => {
-                el.remove();
-            }, 1000);
-        }
-
-        function createFirework(x, y) {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffd700'];
-            const particleCount = isVip ? 40 : 20;
-            const radius = isVip ? 150 : 80;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'firework';
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.boxShadow = `0 0 6px ${particle.style.background}`;
-
-                const angle = (i / particleCount) * Math.PI * 2;
-                const dist = radius * (0.5 + Math.random() * 0.5);
-                const fx = Math.cos(angle) * dist;
-                const fy = Math.sin(angle) * dist;
-                particle.style.setProperty('--fx', fx + 'px');
-                particle.style.setProperty('--fy', fy + 'px');
-                particle.style.animation = `firework ${1 + Math.random()}s ease-out forwards`;
-
-                coinContainer.appendChild(particle);
-                setTimeout(() => particle.remove(), 2000);
-            }
-        }
-
-        function spawnCoins() {
-            const now = Date.now();
-            const displayRect = displayCard.getBoundingClientRect();
-            const x = displayRect.left + displayRect.width / 2;
-            const y = displayRect.top + displayRect.height / 2;
-
-            const interval = isVip ? (isSlacking ? 500 : 200) : (isSlacking ? 800 : 300);
-            if (now - lastCoinTime > interval) {
-                const coinCount = isVip ? 2 : 1;
-                for (let i = 0; i < coinCount; i++) {
-                    createCoin(x, y);
-                }
-                if (Math.random() < 0.4) {
-                    createSparkle(x, y);
-                }
-                lastCoinTime = now;
-            }
-        }
-
-        function triggerCriticalHit() {
-            const now = Date.now();
-            if (now - lastCriticalTime > 3000) {
-                criticalCombo = 0;
-            }
-            criticalCombo++;
-            lastCriticalTime = now;
-
-            const displayRect = displayCard.getBoundingClientRect();
-            const x = displayRect.left + displayRect.width / 2;
-            const y = displayRect.top + displayRect.height / 2;
-
-            const baseCount = isVip ? 10 : 5;
-            const coinCount = Math.min(baseCount + criticalCombo * 3, isVip ? 30 : 20);
-            for (let i = 0; i < coinCount; i++) {
-                setTimeout(() => {
-                    createCoin(
-                        x + (Math.random() - 0.5) * 200,
-                        y + (Math.random() - 0.5) * 100,
-                        true
-                    );
-                }, i * 30);
-            }
-
-            createSparkle(x, y);
-
-            if (isVip) {
-                createFirework(x, y);
-            }
-
-            let critText = '💥 暴击!';
-            if (criticalCombo >= 3) critText = '🔥 连击 x' + criticalCombo + '!';
-            if (criticalCombo >= 5) critText = '⭐ 超必杀 x' + criticalCombo + '!';
-            if (criticalCombo >= 8) critText = '🏆 传说暴击 x' + criticalCombo + '!';
-            createCriticalText(x - 70, y - 50, critText);
-
-            totalEarningsEl.style.transform = 'scale(1.25)';
-            setTimeout(() => {
-                totalEarningsEl.style.transform = 'scale(1)';
-            }, 200);
-        }
-
-        function update(currentTime) {
-            if (!isRunning) return;
-
-            if (!lastUpdate) {
-                lastUpdate = currentTime;
-                startTime = currentTime - pausedTime * 1000;
-            }
-
-            const elapsed = (currentTime - startTime) / 1000;
-            const previousEarnings = totalEarnings;
-            totalEarnings = elapsed * earningsPerSecond;
-            pausedTime = elapsed;
-
-            const earningsDiff = totalEarnings - previousEarnings;
-
-            const critChance = isVip ? (isSlacking ? 0.02 : 0.015) : (isSlacking ? 0.01 : 0.005);
-            if (Math.random() < critChance) {
-                triggerCriticalHit();
-            }
-
-            if (earningsDiff > earningsPerSecond * 0.5) {
-                spawnCoins();
-            }
-
-            totalEarningsEl.textContent = formatMoney(totalEarnings);
-            todayEarningsEl.textContent = formatMoney(totalEarnings);
-
-            const currentElapsed = (currentTime - startTime) / 1000;
-            workTimeEl.textContent = formatTime(currentElapsed);
-
-            totalEarningsEl.classList.add('pulse');
-            setTimeout(() => {
-                totalEarningsEl.classList.remove('pulse');
-            }, 50);
-
-            animationFrameId = requestAnimationFrame(update);
-        }
-
-        function start() {
-            if (isRunning) return;
-
-            calculateEarnings();
-
-            if (earningsPerSecond <= 0) {
-                alert('请输入有效的薪资数据');
-                return;
-            }
-
-            isRunning = true;
-            lastUpdate = null;
-            runningIndicator.classList.remove('paused');
-            animationFrameId = requestAnimationFrame(update);
-        }
-
-        function pause() {
-            isRunning = false;
-            runningIndicator.classList.add('paused');
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-        }
-
-        function reset() {
-            pause();
-            totalEarnings = 0;
-            pausedTime = 0;
-            startTime = null;
-            lastUpdate = null;
-            lastCoinTime = 0;
-            criticalCombo = 0;
-
-            totalEarningsEl.textContent = '¥0.00';
-            todayEarningsEl.textContent = '¥0.00';
-            workTimeEl.textContent = '0时0分0秒';
-            runningIndicator.classList.add('paused');
-        }
-
-        function toggleTheme() {
-            isDarkTheme = !isDarkTheme;
-            document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
-            themeBtn.textContent = isDarkTheme ? '🌙 暗黑' : '☀️ 明亮';
-        }
-
-        function toggleMode() {
-            isSlacking = !isSlacking;
-            modeBtn.textContent = isSlacking ? '🐟 摸鱼模式' : '💼 打工模式';
-            modeBtn.classList.toggle('slacking', isSlacking);
-            modeBadge.textContent = isSlacking ? '摸鱼' : '打工';
-            modeBadge.classList.toggle('slacking', isSlacking);
-
-            if (!isRunning) {
-                calculateEarnings();
-            }
-        }
-
-        async function shareScreen() {
-            try {
-                const text = `💰 我的月薪计算器\n月薪: ¥${monthlySalaryInput.value}\n每秒: ${perSecondEl.textContent}\n已赚: ${totalEarningsEl.textContent}\n\n摸鱼必备 | 月薪计算器`;
-
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(text);
-                }
-
-                shareToast.textContent = '已复制到剪贴板！';
-                shareToast.classList.add('show');
-                setTimeout(() => {
-                    shareToast.classList.remove('show');
-                }, 2000);
-            } catch (err) {
-                shareToast.textContent = '复制失败';
-                shareToast.classList.add('show');
-                setTimeout(() => {
-                    shareToast.classList.remove('show');
-                }, 2000);
-            }
-        }
-
-        monthlySalaryInput.addEventListener('input', () => {
-            if (!isRunning) {
-                calculateEarnings();
-            }
-        });
-
-        workDaysInput.addEventListener('input', () => {
-            if (!isRunning) {
-                calculateEarnings();
-            }
-        });
-
-        workHoursInput.addEventListener('input', () => {
-            if (!isRunning) {
-                calculateEarnings();
-            }
-        });
-
-        startBtn.addEventListener('click', start);
-        pauseBtn.addEventListener('click', pause);
-        resetBtn.addEventListener('click', reset);
-        themeBtn.addEventListener('click', toggleTheme);
-        modeBtn.addEventListener('click', toggleMode);
-        shareBtn.addEventListener('click', shareScreen);
-        unlockBtn.addEventListener('click', showModal);
         confirmBtn.addEventListener('click', verifyCode);
         cancelBtn.addEventListener('click', hideModal);
-        unlockModal.addEventListener('click', (e) => {
-            if (e.target === unlockModal) hideModal();
-        });
-        codeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyCode();
-        });
+        document.getElementById('unlockBtn').addEventListener('click', showModal);
+        bannerUnlockBtn.addEventListener('click', showModal);
+        unlockModal.addEventListener('click', (e) => { if (e.target === unlockModal) hideModal(); });
+        codeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyCode(); });
 
-        init();
+        calculateSalary();
+        checkVipStatus();
     </script>
 </body>
 </html>
